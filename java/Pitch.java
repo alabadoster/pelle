@@ -1,4 +1,4 @@
-public class Pitch extends AST {
+public class Pitch extends Expression {
 	public int pitch;
 
 	public Pitch(String value){

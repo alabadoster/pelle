@@ -1,5 +1,5 @@
 import java.util.HashMap;
 
-public class Struct extends AST {
-	public HashMap<Identifier, IAST> properties;
+public class Struct extends Expression {
+	public HashMap<Identifier, Expression> properties;
 }

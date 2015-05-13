@@ -1,4 +1,4 @@
-public class Identifier extends AST {
+public class Identifier extends Expression {
 	public final String name;
 	public boolean isKeyword;
 

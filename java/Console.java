@@ -12,13 +12,13 @@ public class Console {
 
 		String input;
 		while(true){
-			input = readLine();
-
-			if(input.equals("exit")) break;
-
 			try {
-				AST ast = parser.parse(input);
-				System.out.println(ast);
+				input = readLine();
+
+				if(input.equals("exit")) break;
+
+				Expression expression = parser.parse(input);
+				System.out.println(expression);
 
 			} catch (ParseException e){
 				System.out.println(e);

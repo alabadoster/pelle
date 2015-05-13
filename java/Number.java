@@ -1,4 +1,4 @@
-public class Number extends AST {
+public class Number extends Expression {
 	public int value;
 
 	public Number(String value){

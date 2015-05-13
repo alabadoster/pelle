@@ -1,5 +1,9 @@
 import java.util.List;
 
-public class Sequence extends AST {
-	public List<AST> body;
+public class Sequence extends Expression {
+	public List<Expression> body;
+
+	public Sequence(List<Expression> body){
+		this.body = body;
+	}
 }

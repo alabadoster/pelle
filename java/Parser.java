@@ -8,36 +8,40 @@ public class Parser {
 		stream = new Tokenizer();
 	}
 
-	public AST parse(String input){
+	public Expression parse(String input){
 		stream.feed(input);
 
-		return parseExpression();
+		return parseCall();
 	}
 
-	private Expression parseExpression(){
+	private Call parseCall(){
 		skipPunc("(");
 
-		Token headToken = stream.peek();
-		AST head = null;
-		if(headToken == null){
+		Token peeked = stream.peek();
+		Expression head = null;
+
+		if(peeked == null){
 			expectedMissing("expression");
-		} else if(isPunc("(", headToken)){
-			head = parseExpression();
-		} else if(isIdOrKeyword(headToken)){
+
+		} else if(isPunc("(", peeked)){
+			head = parseCall();
+
+		} else if(isIdOrKeyword(peeked)){
 			head = parseIdentifier();
+
 		} else {
-			expectedExpressionError(headToken);
+			expectedExpressionError(peeked);
 		}
 
-		List<AST> body = parseExpressionBody();
+		List<Expression> body = parseCallArguments();
 
 		skipPunc(")");
 
-		return new Expression(head, body);
+		return new Call(head, body);
 	}
 
-	private List<AST> parseExpressionBody(){
-		ArrayList<AST> result = new ArrayList<AST>();
+	private List<Expression> parseCallArguments(){
+		ArrayList<Expression> result = new ArrayList<Expression>();
 
 		Token peeked = stream.peek();
 		while(!isPunc(")", peeked)){
@@ -53,7 +57,7 @@ public class Parser {
 				result.add(parsePitch());
 
 			} else if(isPunc("(", peeked)){
-				result.add(parseExpression());
+				result.add(parseCall());
 
 			} else {
 				expectedExpressionError(peeked);
@@ -77,6 +81,10 @@ public class Parser {
 
 	private Pitch parsePitch(){
 		return new Pitch(stream.next().value);
+	}
+
+	private Sequence parseSequence(){
+		return new Sequence(null);
 	}
 
 	private boolean isIdOrKeyword(Token in){
