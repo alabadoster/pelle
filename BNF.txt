@@ -1,0 +1,18 @@
+digit			::= "0" | "1" | "2" | … | "9"
+letter			::= "a" | "A" | … | "z" | "Z"
+
+number			::= digit | number digit
+pitch			::= "‘C" | "‘D" | "‘E" | "‘F" | "‘G" | "‘A" | "‘B"
+literal 		::= number | pitch
+
+identifier		::= letter | identifier letter | identifier digit
+
+sequence 		::= "[" sequence-body "]"
+sequence-body	::= empty | expression sequence-body
+
+struct			::= "{" struct-props "}"
+struct-props	::= identifier ":" expression | struct-props "," " identifier ":" expression
+
+expression 		::= "(" identifier expression-body ")"
+expression-elem ::= expression | literal | sequence | struct | identifier
+expression-body	::= empty | expression-elem expression-body
