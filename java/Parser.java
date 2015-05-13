@@ -11,57 +11,68 @@ public class Parser {
 	public Expression parse(String input){
 		stream.feed(input);
 
-		return parseCall();
+		return parseExpression();
 	}
 
-	private Call parseCall(){
-		skipPunc("(");
+	private Expression parseExpression(){
 
 		Token peeked = stream.peek();
-		Expression head = null;
 
+		Expression result = null;
 		if(peeked == null){
-			expectedMissing("expression");
+			return null;
 
 		} else if(isPunc("(", peeked)){
-			head = parseCall();
+			result = parseInvocation();
+
+		} else if(isPunc("[", peeked)){
+			result = parseSequence();
 
 		} else if(isIdOrKeyword(peeked)){
-			head = parseIdentifier();
+			result = parseIdentifier();
 
-		} else {
-			expectedExpressionError(peeked);
+		} else if(isNumber(peeked)){
+			result = parseNumber();
+
 		}
 
-		List<Expression> body = parseCallArguments();
+		return result;
+	}
+
+	private Invocation parseInvocation(){
+		skipPunc("(");
+
+		Expression func = parseExpression();
+		if(func == null) expectedExpression();
+
+		List<Expression> args = parseExpressionList(")");
 
 		skipPunc(")");
 
-		return new Call(head, body);
+		return new Invocation(func, args);
 	}
 
-	private List<Expression> parseCallArguments(){
-		ArrayList<Expression> result = new ArrayList<Expression>();
+
+	private Sequence parseSequence(){
+		skipPunc("[");
+
+		List<Expression> body = parseExpressionList("]");
+
+		skipPunc("]");
+
+		return new Sequence(body);
+	}
+
+	private List<Expression> parseExpressionList(String terminatingSymbol){
+		List<Expression> result = new ArrayList<Expression>();
 
 		Token peeked = stream.peek();
-		while(!isPunc(")", peeked)){
-			if(peeked == null) expectedMissing("')'");
+		while(!isPunc(terminatingSymbol, peeked)){
+			
+			Expression exp = parseExpression();
+			if(exp == null) expectedMissing("'" + terminatingSymbol + "'");
 
-			if(isIdOrKeyword(peeked)){
-				result.add(parseIdentifier());
-
-			} else if(isNumber(peeked)){
-				result.add(parseNumber());
-
-			} else if(isPitch(peeked)){
-				result.add(parsePitch());
-
-			} else if(isPunc("(", peeked)){
-				result.add(parseCall());
-
-			} else {
-				expectedExpressionError(peeked);
-			}
+			result.add(exp);
 			
 			peeked = stream.peek();
 		}
@@ -79,24 +90,12 @@ public class Parser {
 		return new Number(stream.next().value);
 	}
 
-	private Pitch parsePitch(){
-		return new Pitch(stream.next().value);
-	}
-
-	private Sequence parseSequence(){
-		return new Sequence(null);
-	}
-
 	private boolean isIdOrKeyword(Token in){
 		return checkToken(Token.Identifier(""), in) || checkToken(Token.Keyword(""), in);
 	}
 
 	private boolean isNumber(Token in){
 		return checkToken(Token.Number(""), in);
-	}
-
-	private boolean isPitch(Token in){
-		return checkToken(Token.Pitch(""), in);
 	}
 
 	private boolean isPunc(String punc, Token in){
@@ -125,11 +124,11 @@ public class Parser {
 		stream.exitError("Expected identifier, found '" + foundToken.value + "'");
 	}
 
-	private void expectedExpressionError(Token foundToken){
-		stream.exitError("Expected expression, found '" + foundToken.value + "'");
-	}
-
 	private void expectedMissing(String expectedStr){
 		stream.exitError("Expected " + expectedStr + ", found nothing");
+	}
+
+	private void expectedExpression(){
+		expectedMissing("expression");
 	}
 }
