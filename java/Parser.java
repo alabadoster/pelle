@@ -15,20 +15,20 @@ public class Parser {
 	}
 
 	private Expression parseExpression(){
+		Expression result = null;
 
 		Token peeked = stream.peek();
 
-		Expression result = null;
 		if(peeked == null){
 			return null;
 
 		} else if(isPunc("(", peeked)){
-			result = parseInvocation();
+			result = parseInvocationOrKeyword();
 
 		} else if(isPunc("[", peeked)){
 			result = parseSequence();
 
-		} else if(isIdOrKeyword(peeked)){
+		} else if(isId(peeked)){
 			result = parseIdentifier();
 
 		} else if(isNumber(peeked)){
@@ -39,21 +39,56 @@ public class Parser {
 		return result;
 	}
 
-	private Invocation parseInvocation(){
+	private Expression parseInvocationOrKeyword(){
+		Expression result = null;
+
 		skipPunc("(");
 
+		Token peeked = stream.peek();
+		if(isKeyword(peeked)){
+			result = parseKeyword();
+		} else {
+			result = parseInvocation();
+		}
+
+		skipPunc(")");
+
+		return result;
+	}
+
+	private Expression parseKeyword(){
+
+		Token keywordToken = stream.next();
+		if(keywordToken.value.equals("->")){
+			return parseFuncDefinition();
+		}
+
+		return null;
+	}
+
+	private FuncDefinition parseFuncDefinition(){
+
+		skipPunc("(");
+		List<Identifier> params = parseIdentifierList(")");
+		skipPunc(")");
+
+		Expression body = parseExpression();
+
+		return new FuncDefinition(null, params, body);
+	}
+
+	private Invocation parseInvocation(){
 		Expression func = parseExpression();
 		if(func == null) expectedExpression();
 
 		List<Expression> args = parseExpressionList(")");
-
-		skipPunc(")");
 
 		return new Invocation(func, args);
 	}
 
 
 	private Sequence parseSequence(){
+
 		skipPunc("[");
 
 		List<Expression> body = parseExpressionList("]");
@@ -80,18 +115,38 @@ public class Parser {
 		return result;
 	}
 
+
+	private List<Identifier> parseIdentifierList(String terminatingSymbol){
+		List<Identifier> result = new ArrayList<Identifier>();
+
+		Token peeked = stream.peek();
+		while(!isPunc(terminatingSymbol, peeked)){
+			
+			Identifier id = parseIdentifier();
+			if(id == null) expectedMissing("'" + terminatingSymbol + "'");
+
+			result.add(id);
+			
+			peeked = stream.peek();
+		}
+
+		return result;
+	}
+
 	private Identifier parseIdentifier(){
-		Token t = stream.next();
-		boolean isKeyword = (t.type == Token.TokenType.KEYWORD);
-		return new Identifier(t.value, isKeyword);
+		return new Identifier(stream.next().value);
 	}
 
 	private Number parseNumber(){
 		return new Number(stream.next().value);
 	}
 
-	private boolean isIdOrKeyword(Token in){
-		return checkToken(Token.Identifier(""), in) || checkToken(Token.Keyword(""), in);
+	private boolean isId(Token in){
+		return checkToken(Token.Identifier(""), in);
+	}
+
+	private boolean isKeyword(Token in){
+		return checkToken(Token.Keyword(""), in);
 	}
 
 	private boolean isNumber(Token in){

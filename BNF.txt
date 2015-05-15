@@ -7,12 +7,15 @@ literal 		::= number | pitch
 
 identifier		::= letter | identifier letter | identifier digit
 
-sequence 		::= "[" sequence-body "]"
-sequence-body	::= empty | expression sequence-body
+sequence 		::= "[" expression-list "]"
 
 struct			::= "{" struct-props "}"
 struct-props	::= identifier ":" expression | struct-props "," " identifier ":" expression
 
-expression 		::= "(" identifier expression-body ")"
-expression-elem ::= expression | literal | sequence | struct | identifier
-expression-body	::= empty | expression-elem expression-body
+func-definition ::= "(" "->" "(" func-params ")" expression ")"
+func-params		::= empty | identifier func-params
+
+func-invocation ::= "(" identifier expression-list ")"
+
+expression 		::= literal | sequence | struct | identifier | func-invocation | func-definition
+expression-list ::= empty | expression expression-list

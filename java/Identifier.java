@@ -1,15 +1,8 @@
 public class Identifier extends Expression {
 	public final String name;
-	public boolean isKeyword;
 
 	public Identifier(String name){
 		this.name = name;
-		this.isKeyword = false;
-	}
-
-	public Identifier(String name, boolean keyword){
-		this.name = name;
-		this.isKeyword = keyword;
 	}
 
 	@Override

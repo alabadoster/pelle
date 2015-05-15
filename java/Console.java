@@ -21,9 +21,8 @@ public class Console {
 				System.out.println(expression);
 
 			} catch (ParseException e){
-				System.out.println(e);
+				e.printStackTrace();
 			} catch (Exception e){
-				System.out.println(e);
 				e.printStackTrace();
 			}
 		}

@@ -1,10 +1,8 @@
 public class Tokenizer {
 
 	final String punctuation = "()[]{},:";
-	//final String pitches = " Cb C C# Db D D# Eb E E# Fb F F# Gb G G# Ab A A# Bb B B# ";
-	//final char pitchSymbol = '\'';
 
-	final String keywords = " func let ";
+	final String keywords = " -> let ";
 
 	final CharacterStream stream;
 
@@ -40,12 +38,6 @@ public class Tokenizer {
 			return Token.Punctuation(String.valueOf(c));
 		}
 
-		/*
-		if(c == pitchSymbol){
-			return readPitch();
-		}
-		*/
-
 		return readIdentifierOrKeyword(c);
 	}
 
@@ -80,29 +72,6 @@ public class Tokenizer {
 		return (keywords.indexOf(" " + value + " ") == -1 ) ? Token.Identifier(value) : Token.Keyword(value);
 	}
 
-	/*private Token readPitch(){
-		String value = "";
-		while(!stream.eof()){
-			char c = stream.peek();
-			if(!(isLetter(c) || c == '#')) break;
-			value += stream.next();
-		}
-
-		if(pitches.indexOf(" " + value + " ") == -1){
-			stream.exitError("Couldn't understand pitch '" + value);
-			return null;
-		}
-
-		if(!isDigit(stream.peek())){
-			stream.exitError("Missing pitch octave '" + value);
-			return null;
-		}
-
-		value += "" + readNumberString(stream.next());
-
-		return Token.Pitch(value);
-	}*/
-
 	private boolean isPunctuation(char c){
 		return punctuation.indexOf(c) != -1;
 	}
@@ -121,11 +90,6 @@ public class Tokenizer {
 
 	private boolean isIdentifierLetter(char c){
 		return (!isPunctuation(c) && !isWhitespace(c));
-	}
-
-	private boolean isLetter(char c){
-		//TODO this is maybe too much?
-		return Character.isLetter(c);
 	}
 
 	private void skipWhitespace(){

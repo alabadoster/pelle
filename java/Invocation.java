@@ -10,7 +10,7 @@ public class Invocation extends Expression {
 	}
 
 	public String toString(){
-		String result = "(call: " + func.toString() + ", args:";
+		String result = "(call func: " + func.toString() + ", args:";
 
 		if(args.size() == 0) result += " <none>";
 		else for(Expression exp : args) result += " " + exp.toString();
